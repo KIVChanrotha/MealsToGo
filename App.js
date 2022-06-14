@@ -20,28 +20,13 @@ import {
   NotoSerifKhmer_400Regular,
 } from "@expo-google-fonts/noto-serif-khmer";
 
-import { RestaurantsContextProvider } from "./src/services/restaurants/restaurants.context";
-import { LocationContextProvider } from "./src/services/location/location.context";
+import { Navigation } from "./src/infrastructure/navigation";
 
-import { AppNavigator } from "./src/infrastructure/navigation/app.navigator";
-import { FavouritesContextProvider } from "./src/services/favourites/favourites.context";
-
-import { initializeApp } from "firebase/app";
+import { AuthenticationContextProvider } from "./src/services/authentication/authentication.context";
 
 //const isAdroid = Platform.OS === "android";
 
 //console.log(StatusBar.currentHeight);
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB-NlAz6MrchB8NnaTaSWchhwBg36Y_sHo",
-  authDomain: "mealstogo-2ffad.firebaseapp.com",
-  projectId: "mealstogo-2ffad",
-  storageBucket: "mealstogo-2ffad.appspot.com",
-  messagingSenderId: "396589097227",
-  appId: "1:396589097227:web:dd4fff63f73193c34ec20e",
-};
-
-initializeApp(firebaseConfig);
 
 export default function App() {
   let [oswaldLoaded] = useOswald({
@@ -67,13 +52,9 @@ export default function App() {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <FavouritesContextProvider>
-          <LocationContextProvider>
-            <RestaurantsContextProvider>
-              <AppNavigator />
-            </RestaurantsContextProvider>
-          </LocationContextProvider>
-        </FavouritesContextProvider>
+        <AuthenticationContextProvider>
+          <Navigation />
+        </AuthenticationContextProvider>
       </ThemeProvider>
       <ExpoStatusBar style="auto" />
     </>

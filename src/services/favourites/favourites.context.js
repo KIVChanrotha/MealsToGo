@@ -1,12 +1,21 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthenticationContext } from "../authentication/authentication.context";
 
 export const FavouritesContext = createContext();
 
 export const FavouritesContextProvider = ({ children }) => {
+  const { user } = useContext(AuthenticationContext);
+
   const [favourites, setFavourites] = useState([]);
 
-  const saveFavourites = async (value) => {
+  const saveFavourites = async (value, uid) => {
     try {
       const jsonValue = JSON.stringify(value);
       await AsyncStorage.setItem("@favourites", jsonValue);
@@ -15,16 +24,18 @@ export const FavouritesContextProvider = ({ children }) => {
     }
   };
 
-  const loadFavourites = async () => {
-    try {
-      const value = await AsyncStorage.getItem("@favourites");
-      if (value !== null) {
-        setFavourites(JSON.parse(value));
+  const loadFavourites = useCallback(() => {
+    async (uid) => {
+      try {
+        const value = await AsyncStorage.getItem("@favourites");
+        if (value !== null) {
+          setFavourites(JSON.parse(value));
+        }
+      } catch (e) {
+        console.log("error loading", e);
       }
-    } catch (e) {
-      console.log("error loading", e);
-    }
-  };
+    };
+  }, []);
 
   const add = (restaurant) => {
     setFavourites([...favourites, restaurant]);
@@ -40,12 +51,16 @@ export const FavouritesContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    loadFavourites();
-  }, []); //Load for the first time
+    if (user) {
+      loadFavourites(user.uid);
+    }
+  }, [user, loadFavourites]); //Load for the first time
 
   useEffect(() => {
-    saveFavourites(favourites);
-  }, [favourites]); //Every time Favourites change
+    if (user) {
+      saveFavourites(favourites, user.uid);
+    }
+  }, [favourites, user]); //Every time Favourites change
 
   return (
     <FavouritesContext.Provider
